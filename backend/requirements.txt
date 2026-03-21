@@ -8,3 +8,4 @@ geopandas
 shapely
 osmnx
 scikit-learn
+gunicorn
