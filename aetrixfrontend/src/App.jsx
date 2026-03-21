@@ -6,7 +6,7 @@ import RightPanel from './components/RightPanel';
 import SentinelChat from './components/SentinelChat';
 import './index.css';
 
-const API = 'http://127.0.0.1:8000';
+const API = 'https://aetriks-mvp.onrender.com';
 
 /* ─── Helpers ─── */
 const generateMapElements = (center, currentMetrics) => {

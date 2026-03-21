@@ -12,7 +12,7 @@ export default function Sidebar({ city, activeMetrics, onMetricClick }) {
   const fetchPrediction = async () => {
     try {
       setIsPredicting(true);
-      const res = await fetch(`http://127.0.0.1:8000/api/forecast/${city.name.toLowerCase()}`);
+      const res = await fetch(`https://aetriks-mvp.onrender.com/api/forecast/${city.name.toLowerCase()}`);
       const data = await res.json();
       if (data.features && data.features.length > 0) {
         let avgTemp = 0, avgAqi = 0, avgNdvi = 0;

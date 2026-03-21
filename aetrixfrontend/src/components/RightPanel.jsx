@@ -4,7 +4,7 @@ import { metricMeta, months } from '../constants';
 
 Chart.register(...registerables);
 
-const API = 'http://127.0.0.1:8000';
+const API = 'https://aetriks-mvp.onrender.com';
 
 const colorMap = {
   temp: { line: '#ef5350', bg1: 'rgba(239,83,80,0.25)', bg2: 'rgba(239,83,80,0.01)' },

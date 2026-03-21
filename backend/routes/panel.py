@@ -68,9 +68,9 @@ def city_panel(city_name: str):
     # In RightPanel.jsx: `const mainData = [...data, null, null, null];`, wait, data is just 12 months.
     # In App.jsx, `const newLst = [...baseCity.lst];` which is 12 length arrays mapped to Jan-Dec.
     
-    lst_array = [null] * 12
-    aqi_array = [null] * 12
-    ndvi_array = [null] * 12
+    lst_array = [None] * 12
+    aqi_array = [None] * 12
+    ndvi_array = [None] * 12
     
     for (y, m), vals in monthly_stats.items():
         m_idx = m - 1
