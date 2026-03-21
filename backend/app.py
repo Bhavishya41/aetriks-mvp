@@ -37,11 +37,7 @@ def home():
     return jsonify({"message": "Health Sentinel API is running ✅", "version": "1.0"})
 
 
-@app.route("/api/wards", methods=["GET"])
-def get_wards():
-    """Fetch all ward rows from Supabase."""
-    response = app.supabase.table("wards").select("*").execute()
-    return jsonify(response.data)
+# Ward data is now returned relationally via GET /api/city-health/<city_name>
 
 
 # ── Entrypoint ───────────────────────────────────────────────────────────────
