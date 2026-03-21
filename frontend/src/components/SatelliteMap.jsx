@@ -9,35 +9,36 @@ mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || 'YOUR_MAPBOX_ACCESS_
 const DARK_STYLE = 'mapbox://styles/mapbox/dark-v11';
 const SATELLITE_STYLE = 'mapbox://styles/mapbox/satellite-streets-v12';
 
+function generateCirclePolygon(center, radius) {
+  const points = 32;
+  const coords = [];
+  const [lng, lat] = center;
+  for (let i = 0; i <= points; i++) {
+    const angle = (i * 2 * Math.PI) / points;
+    // Mapbox GL JS requires longitude adjustment to maintain circular shape
+    const latAdjust = Math.cos((lat * Math.PI) / 180);
+    const dLng = (radius / latAdjust) * Math.cos(angle);
+    const dLat = radius * Math.sin(angle);
+    coords.push([lng + dLng, lat + dLat]);
+  }
+  return [coords];
+}
+
+const rawWards = [
+  { id: 'W01', name: 'Koramangala', health_risk_score: 78, risk: 0.78, population: 182000, center: [77.625, 12.93], radius: 0.015 },
+  { id: 'W02', name: 'Indiranagar', health_risk_score: 55, risk: 0.55, population: 145000, center: [77.64, 12.98], radius: 0.012 },
+  { id: 'W08', name: 'Bommanahalli', health_risk_score: 95, risk: 0.95, population: 278000, center: [77.625, 12.90], radius: 0.016 },
+  { id: 'W15', name: 'Electronic City', health_risk_score: 82, risk: 0.82, population: 387000, center: [77.665, 12.845], radius: 0.018 },
+  { id: 'W06', name: 'Rajajinagar', health_risk_score: 31, risk: 0.31, population: 167000, center: [77.55, 12.99], radius: 0.014 }
+];
+
 const MOCK_WARDS_GEOJSON = {
   type: 'FeatureCollection',
-  features: [
-    {
-      type: 'Feature',
-      properties: { id: 'W01', name: 'Koramangala', health_risk_score: 78, risk: 0.78, population: 182000 },
-      geometry: { type: 'Polygon', coordinates: [[[77.61, 12.92], [77.64, 12.92], [77.64, 12.94], [77.61, 12.94], [77.61, 12.92]]] }
-    },
-    {
-      type: 'Feature',
-      properties: { id: 'W02', name: 'Indiranagar', health_risk_score: 55, risk: 0.55, population: 145000 },
-      geometry: { type: 'Polygon', coordinates: [[[77.63, 12.97], [77.65, 12.97], [77.65, 12.99], [77.63, 12.99], [77.63, 12.97]]] }
-    },
-    {
-      type: 'Feature',
-      properties: { id: 'W08', name: 'Bommanahalli', health_risk_score: 95, risk: 0.95, population: 278000 },
-      geometry: { type: 'Polygon', coordinates: [[[77.61, 12.89], [77.64, 12.89], [77.64, 12.91], [77.61, 12.91], [77.61, 12.89]]] }
-    },
-    {
-      type: 'Feature',
-      properties: { id: 'W15', name: 'Electronic City', health_risk_score: 82, risk: 0.82, population: 387000 },
-      geometry: { type: 'Polygon', coordinates: [[[77.65, 12.83], [77.68, 12.83], [77.68, 12.86], [77.65, 12.86], [77.65, 12.83]]] }
-    },
-    {
-      type: 'Feature',
-      properties: { id: 'W06', name: 'Rajajinagar', health_risk_score: 31, risk: 0.31, population: 167000 },
-      geometry: { type: 'Polygon', coordinates: [[[77.54, 12.98], [77.56, 12.98], [77.56, 13.00], [77.54, 13.00], [77.54, 12.98]]] }
-    }
-  ]
+  features: rawWards.map(w => ({
+    type: 'Feature',
+    properties: w,
+    geometry: { type: 'Polygon', coordinates: generateCirclePolygon(w.center, w.radius) }
+  }))
 };
 
 export default function SatelliteMap({ onWardSelect, selectedWard }) {

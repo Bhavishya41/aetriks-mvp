@@ -2,24 +2,24 @@ import { useEffect, useRef, useState } from 'react';
 
 // Mock ward data with SVG polygon positions for the placeholder map
 const wards = [
-  { id: 'W01', name: 'Koramangala', risk: 0.78, population: 182000, cx: 58, cy: 44, rx: 14, ry: 10 },
-  { id: 'W02', name: 'Indiranagar', risk: 0.55, population: 145000, cx: 74, cy: 30, rx: 10, ry: 8 },
-  { id: 'W03', name: 'Whitefield', risk: 0.42, population: 320000, cx: 85, cy: 45, rx: 13, ry: 9 },
-  { id: 'W04', name: 'Hebbal', risk: 0.19, population: 98000, cx: 62, cy: 18, rx: 10, ry: 7 },
-  { id: 'W05', name: 'HSR Layout', risk: 0.88, population: 215000, cx: 55, cy: 60, rx: 12, ry: 9 },
-  { id: 'W06', name: 'Rajajinagar', risk: 0.31, population: 167000, cx: 36, cy: 32, rx: 11, ry: 8 },
-  { id: 'W07', name: 'Yelahanka', risk: 0.24, population: 89000, cx: 48, cy: 12, rx: 9, ry: 7 },
-  { id: 'W08', name: 'Bommanahalli', risk: 0.95, population: 278000, cx: 66, cy: 70, rx: 13, ry: 10 },
-  { id: 'W09', name: 'Majestic', risk: 0.61, population: 124000, cx: 42, cy: 44, rx: 10, ry: 8 },
-  { id: 'W10', name: 'BTM Layout', risk: 0.74, population: 198000, cx: 48, cy: 58, rx: 11, ry: 8 },
-  { id: 'W11', name: 'Malleshwaram', risk: 0.38, population: 112000, cx: 40, cy: 26, rx: 10, ry: 7 },
-  { id: 'W12', name: 'Jayanagar', risk: 0.52, population: 143000, cx: 44, cy: 54, rx: 9, ry: 8 },
-  { id: 'W13', name: 'JP Nagar', risk: 0.66, population: 231000, cx: 38, cy: 64, rx: 12, ry: 9 },
-  { id: 'W14', name: 'Banashankari', risk: 0.44, population: 176000, cx: 30, cy: 56, rx: 11, ry: 8 },
-  { id: 'W15', name: 'Electronic City', risk: 0.82, population: 387000, cx: 62, cy: 82, rx: 14, ry: 10 },
-  { id: 'W16', name: 'Yeshwanthpur', risk: 0.29, population: 104000, cx: 28, cy: 40, rx: 9, ry: 7 },
-  { id: 'W17', name: 'KR Puram', risk: 0.71, population: 195000, cx: 78, cy: 55, rx: 11, ry: 9 },
-  { id: 'W18', name: 'Bellandur', risk: 0.91, population: 268000, cx: 76, cy: 68, rx: 12, ry: 9 },
+  { id: 'W01', name: 'Koramangala', risk: 0.78, population: 182000, cx: 58, cy: 44, r: 12 },
+  { id: 'W02', name: 'Indiranagar', risk: 0.55, population: 145000, cx: 74, cy: 30, r: 9 },
+  { id: 'W03', name: 'Whitefield', risk: 0.42, population: 320000, cx: 85, cy: 45, r: 11 },
+  { id: 'W04', name: 'Hebbal', risk: 0.19, population: 98000, cx: 62, cy: 18, r: 8.5 },
+  { id: 'W05', name: 'HSR Layout', risk: 0.88, population: 215000, cx: 55, cy: 60, r: 10.5 },
+  { id: 'W06', name: 'Rajajinagar', risk: 0.31, population: 167000, cx: 36, cy: 32, r: 9.5 },
+  { id: 'W07', name: 'Yelahanka', risk: 0.24, population: 89000, cx: 48, cy: 12, r: 8 },
+  { id: 'W08', name: 'Bommanahalli', risk: 0.95, population: 278000, cx: 66, cy: 70, r: 11.5 },
+  { id: 'W09', name: 'Majestic', risk: 0.61, population: 124000, cx: 42, cy: 44, r: 9 },
+  { id: 'W10', name: 'BTM Layout', risk: 0.74, population: 198000, cx: 48, cy: 58, r: 9.5 },
+  { id: 'W11', name: 'Malleshwaram', risk: 0.38, population: 112000, cx: 40, cy: 26, r: 8.5 },
+  { id: 'W12', name: 'Jayanagar', risk: 0.52, population: 143000, cx: 44, cy: 54, r: 8.5 },
+  { id: 'W13', name: 'JP Nagar', risk: 0.66, population: 231000, cx: 38, cy: 64, r: 10.5 },
+  { id: 'W14', name: 'Banashankari', risk: 0.44, population: 176000, cx: 30, cy: 56, r: 9.5 },
+  { id: 'W15', name: 'Electronic City', risk: 0.82, population: 387000, cx: 62, cy: 82, r: 12 },
+  { id: 'W16', name: 'Yeshwanthpur', risk: 0.29, population: 104000, cx: 28, cy: 40, rx: 8 },
+  { id: 'W17', name: 'KR Puram', risk: 0.71, population: 195000, cx: 78, cy: 55, r: 10 },
+  { id: 'W18', name: 'Bellandur', risk: 0.91, population: 268000, cx: 76, cy: 68, r: 10.5 },
 ];
 
 function getRiskColor(risk, alpha = 1) {
@@ -137,11 +137,10 @@ export default function MapCanvas({ onWardClick, selectedWard }) {
             <g key={ward.id}>
               {/* Glow ring for critical wards */}
               {isCritical && (
-                <ellipse
+                <circle
                   cx={ward.cx}
                   cy={ward.cy}
-                  rx={ward.rx + 3}
-                  ry={ward.ry + 3}
+                  r={ward.r + 3}
                   fill="none"
                   stroke="#ef4444"
                   strokeWidth="0.8"
@@ -151,12 +150,11 @@ export default function MapCanvas({ onWardClick, selectedWard }) {
                 />
               )}
 
-              {/* Ward ellipse */}
-              <ellipse
+              {/* Ward circle */}
+              <circle
                 cx={ward.cx}
                 cy={ward.cy}
-                rx={isSelected || isHovered ? ward.rx + 1.5 : ward.rx}
-                ry={isSelected || isHovered ? ward.ry + 1.5 : ward.ry}
+                r={isSelected || isHovered ? ward.r + 1.5 : ward.r}
                 fill={color}
                 stroke={isSelected ? '#60a5fa' : strokeColor}
                 strokeWidth={isSelected ? 0.8 : 0.4}
@@ -191,8 +189,8 @@ export default function MapCanvas({ onWardClick, selectedWard }) {
               {/* Critical warning dot */}
               {isCritical && !isSelected && (
                 <circle
-                  cx={ward.cx + ward.rx - 2}
-                  cy={ward.cy - ward.ry + 1}
+                  cx={ward.cx + ward.r - 2}
+                  cy={ward.cy - ward.r + 1}
                   r="1.2"
                   fill="#f59e0b"
                   style={{ animation: 'pulseDot 1.5s ease-in-out infinite' }}
