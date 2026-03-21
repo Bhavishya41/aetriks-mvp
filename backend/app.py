@@ -1,31 +1,49 @@
 import os
-from flask import Flask, jsonify, request
+import logging
+from flask import Flask, jsonify
 from flask_cors import CORS
 from supabase import create_client, Client
 from dotenv import load_dotenv
 
-# 1. Load environment variables
+from routes.audit import audit_bp
+
+# ── Configuration ──────────────────────────────────────────────────────────
 load_dotenv()
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
 
+# ── App setup ───────────────────────────────────────────────────────────────
 app = Flask(__name__)
-CORS(app) # This allows your Vite frontend to talk to this server
+CORS(app)  # Allow Vite frontend (localhost:5173) to call this API
 
-# 2. Initialize Supabase
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
-supabase: Client = create_client(url, key)
+# ── Supabase client (attached to app so Blueprints can access it) ────────────
+supabase_url: str = os.environ.get("SUPABASE_URL")
+supabase_key: str = os.environ.get("SUPABASE_KEY")
 
-@app.route('/')
+if not supabase_url or not supabase_key:
+    raise EnvironmentError("SUPABASE_URL and SUPABASE_KEY must be set in .env")
+
+app.supabase: Client = create_client(supabase_url, supabase_key)
+
+# ── Blueprints ───────────────────────────────────────────────────────────────
+app.register_blueprint(audit_bp)
+
+# ── Core routes ─────────────────────────────────────────────────────────────
+
+@app.route("/")
 def home():
-    return "Health Sentinel API is Running!"
+    return jsonify({"message": "Health Sentinel API is running ✅", "version": "1.0"})
 
-# 3. Endpoint to fetch Ward Data from DB
-@app.route('/api/wards', methods=['GET'])
+
+@app.route("/api/wards", methods=["GET"])
 def get_wards():
-    # This fetches all rows from a table named 'wards' in Supabase
-    response = supabase.table("wards").select("*").execute()
+    """Fetch all ward rows from Supabase."""
+    response = app.supabase.table("wards").select("*").execute()
     return jsonify(response.data)
 
-if __name__ == '__main__':
-    # Run in debug mode so it restarts when you save changes
+
+# ── Entrypoint ───────────────────────────────────────────────────────────────
+if __name__ == "__main__":
     app.run(port=8000)

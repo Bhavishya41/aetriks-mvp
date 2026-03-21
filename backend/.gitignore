@@ -9,6 +9,7 @@ __pycache__/
 
 # --- Supabase / Secret Keys ---
 # Never push your API keys to GitHub
+gee-key.json
 .env
 .env.local
 .env.*.local
