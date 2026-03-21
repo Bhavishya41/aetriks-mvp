@@ -6,6 +6,7 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 
 from routes.audit import audit_bp
+from routes.forecast import forecast_bp
 
 # ── Configuration ──────────────────────────────────────────────────────────
 load_dotenv()
@@ -29,6 +30,7 @@ app.supabase: Client = create_client(supabase_url, supabase_key)
 
 # ── Blueprints ───────────────────────────────────────────────────────────────
 app.register_blueprint(audit_bp)
+app.register_blueprint(forecast_bp)
 
 # ── Core routes ─────────────────────────────────────────────────────────────
 
@@ -42,4 +44,4 @@ def home():
 
 # ── Entrypoint ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    app.run(port=8000)
+    app.run(host='0.0.0.0',port=8000)

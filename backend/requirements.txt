@@ -7,3 +7,4 @@ pandas
 geopandas
 shapely
 osmnx
+scikit-learn
