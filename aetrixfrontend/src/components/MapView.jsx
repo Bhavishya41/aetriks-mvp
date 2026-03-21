@@ -40,16 +40,16 @@ export default function MapView({ city, activeMetrics }) {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const layersRef = useRef({});
-  const [basemap, setBasemap] = useState('light');
+  const [basemap, setBasemap] = useState('dark');
 
-  const lightTile = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+  const darkTile = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
   const satTile = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
 
   useEffect(() => {
     if (mapInstance.current) return;
     const map = L.map(mapRef.current, { zoomControl: false, attributionControl: false });
     L.control.zoom({ position: 'topright' }).addTo(map);
-    layersRef.current.tileLayer = L.tileLayer(lightTile, { maxZoom: 18 }).addTo(map);
+    layersRef.current.tileLayer = L.tileLayer(darkTile, { maxZoom: 18 }).addTo(map);
     map.setView(city.center, city.zoom);
     mapInstance.current = map;
   }, []);
@@ -133,7 +133,7 @@ export default function MapView({ city, activeMetrics }) {
     const map = mapInstance.current;
     if (!map) return;
     if (layersRef.current.tileLayer) map.removeLayer(layersRef.current.tileLayer);
-    layersRef.current.tileLayer = L.tileLayer(type === 'satellite' ? satTile : lightTile, { maxZoom: 18 }).addTo(map);
+    layersRef.current.tileLayer = L.tileLayer(type === 'satellite' ? satTile : darkTile, { maxZoom: 18 }).addTo(map);
     setBasemap(type);
   };
 
@@ -143,17 +143,17 @@ export default function MapView({ city, activeMetrics }) {
     <main className="app-map">
       <div ref={mapRef} className="map-container" />
       <div className="map-controls">
-        <button className={`map-btn${basemap === 'light' ? ' active' : ''}`} onClick={() => switchBase('light')}>Light</button>
+        <button className={`map-btn${basemap === 'dark' ? ' active' : ''}`} onClick={() => switchBase('dark')}>Dark Map</button>
         <button className={`map-btn${basemap === 'satellite' ? ' active' : ''}`} onClick={() => switchBase('satellite')}>Satellite</button>
       </div>
       {activeLegends.length > 0 && (
-        <div className="map-legend fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div className="map-legend fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '10px', background: '#0a0a0a', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', border: '1px solid var(--border)' }}>
           {activeLegends.map((legend, idx) => (
             <div key={idx}>
-              <h4>{legend.title}</h4>
+              <h4 style={{color: '#94a3b8'}}>{legend.title}</h4>
               <div className="legend-items">
                 {legend.items.map((it, i) => (
-                  <div className="legend-item" key={i}>
+                  <div className="legend-item" style={{color: '#cbd5e1'}} key={i}>
                     <span className="legend-swatch" style={{ background: it.color }} />
                     {it.label}
                   </div>

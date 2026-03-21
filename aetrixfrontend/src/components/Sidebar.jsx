@@ -114,14 +114,14 @@ export default function Sidebar({ city, activeMetrics, onMetricClick }) {
           onClick={fetchPrediction}
           disabled={isPredicting}
           className="metric-card"
-          style={{ width: '100%', padding: '12px', justifyContent: 'center', cursor: isPredicting ? 'wait' : 'pointer', background: '#3f51b5', color: 'white', fontWeight: 'bold', border: 'none', borderRadius: '8px', marginBottom: '12px' }}
+          style={{ width: '100%', padding: '12px', display: 'flex', justifyContent: 'center', cursor: isPredicting ? 'wait' : 'pointer', background: 'transparent', color: '#ffffff', fontWeight: 'bold', border: '1px solid #333333', borderRadius: '8px', marginBottom: '12px', transition: 'all 0.2s' }}
         >
           {isPredicting ? 'Predicting...' : "Predict Next Month's Condition"}
         </button>
 
         {prediction && (
-          <div className="metric-card bg-slate-800 border-slate-700" style={{ marginBottom: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ fontSize: '13px', color: '#9aa0b4', textTransform: 'uppercase', letterSpacing: '1px', textAlign: 'center' }}>Next Month Forecast</div>
+          <div className="metric-card" style={{ marginBottom: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(255,255,255,0.03)' }}>
+            <div style={{ fontSize: '13px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', textAlign: 'center' }}>Next Month Forecast</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
               <span style={{color: '#ef5350'}}>Max Temp:</span> 
               <strong>{prediction.temp}°C</strong>
@@ -141,14 +141,14 @@ export default function Sidebar({ city, activeMetrics, onMetricClick }) {
  
           onClick={calculateRisk}
           className="metric-card"
-          style={{ width: '100%', padding: '12px', justifyContent: 'center', cursor: 'pointer', background: 'var(--color-accent)', color: 'white', fontWeight: 'bold', border: 'none', borderRadius: '8px' }}
+          style={{ width: '100%', padding: '12px', display: 'flex', justifyContent: 'center', cursor: 'pointer', background: '#ffffff', color: '#000000', fontWeight: 'bold', border: '1px solid #ffffff', borderRadius: '8px', transition: 'all 0.2s' }}
         >
           Calculate Risk Factor
         </button>
 
         {riskFactor && (
-          <div className="metric-card bg-slate-800 border-slate-700" style={{ marginTop: '12px', padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <div style={{ fontSize: '13px', color: '#9aa0b4', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Risk Factor Score</div>
+          <div className="metric-card" style={{ marginTop: '12px', padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'rgba(255,255,255,0.03)' }}>
+            <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Risk Factor Score</div>
             <div style={{ fontSize: '36px', fontWeight: '800', lineHeight: '1', marginBottom: '4px', color: riskFactor > 70 ? '#ef5350' : riskFactor > 40 ? '#ffa726' : '#43a047' }}>
               {riskFactor}
             </div>

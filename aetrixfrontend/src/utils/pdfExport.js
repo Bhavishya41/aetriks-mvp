@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import html2canvas from 'html2canvas';
 
 export const downloadCityReport = async ({
@@ -108,7 +108,7 @@ export const downloadCityReport = async ({
     addText('12-Month Historical Data', 14, true);
     currentY += 2;
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: currentY,
       head: [['Month', 'Temp (°C)', 'NO2 Proxy (µg/m³)', 'NDVI']],
       body: tableData,

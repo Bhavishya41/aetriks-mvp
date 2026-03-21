@@ -74,8 +74,9 @@ function MetricChart({ id, metric, data, forecast }) {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: '#fff', titleColor: '#1a1d2e', bodyColor: '#5a6178',
-            borderColor: '#e5e9f0', borderWidth: 1, padding: 12, cornerRadius: 8,
+            backgroundColor: '#0a0a0a', 
+            titleColor: '#ffffff', bodyColor: '#a3a3a3',
+            borderColor: 'rgba(255, 255, 255, 0.1)', borderWidth: 1, padding: 12, cornerRadius: 8,
             titleFont: { family: 'Outfit', size: 13, weight: 600 },
             bodyFont: { family: 'Inter', size: 12 },
             callbacks: {
@@ -87,8 +88,8 @@ function MetricChart({ id, metric, data, forecast }) {
           },
         },
         scales: {
-          x: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { color: '#9aa0b4', font: { family: 'Inter', size: 10 } } },
-          y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { color: '#9aa0b4', font: { family: 'Inter', size: 10 } } },
+          x: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#64748b', font: { family: 'Inter', size: 10 } } },
+          y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#64748b', font: { family: 'Inter', size: 10 } } },
         },
       },
     });
@@ -182,7 +183,11 @@ function ActionPlanTab({ cityName, anomalies, panelData }) {
   }, [anomalies, selectedWard]);
 
   useEffect(() => {
-    if (!selectedWard?.ward_id) return;
+    if (!selectedWard?.ward_id) {
+      // If it's the mock empty anomaly or missing ward data from old backend
+      setInsight(null);
+      return;
+    }
     let cancelled = false;
 
     const fetchInsight = async () => {
@@ -206,6 +211,9 @@ function ActionPlanTab({ cityName, anomalies, panelData }) {
     return <div style={{ padding: '24px', color: '#9aa0b4', fontSize: 13 }}>No anomalies found to analyze.</div>;
   }
 
+  const isHealthy = selectedWard?.title === "No critical anomalies";
+  const missingBackendUpdate = !isHealthy && !selectedWard?.ward_id;
+
   return (
     <div className="fade-in">
       <div className="action-top">
@@ -213,8 +221,8 @@ function ActionPlanTab({ cityName, anomalies, panelData }) {
         <button 
           className="btn-export" 
           onClick={() => downloadCityReport({ cityName, panelData, insight, anomalies })}
-          disabled={!insight}
-          style={{ opacity: !insight ? 0.6 : 1 }}
+          disabled={!insight && !isHealthy}
+          style={{ opacity: (!insight && !isHealthy) ? 0.6 : 1 }}
         >
           {'\u2193'} Download Report
         </button>
@@ -228,9 +236,9 @@ function ActionPlanTab({ cityName, anomalies, panelData }) {
             onClick={() => setSelectedWard(a)}
             style={{
               padding: '6px 14px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: 600,
-              backgroundColor: selectedWard?.ward_id === a.ward_id ? 'var(--color-accent)' : '#fff',
-              color: selectedWard?.ward_id === a.ward_id ? '#fff' : 'var(--text-secondary)',
-              border: `1px solid ${selectedWard?.ward_id === a.ward_id ? 'var(--color-accent)' : 'var(--border)'}`,
+              backgroundColor: selectedWard?.title === a.title ? 'var(--color-accent)' : 'rgba(255,255,255,0.05)',
+              color: selectedWard?.title === a.title ? '#000000' : 'var(--text-secondary)',
+              border: `1px solid ${selectedWard?.title === a.title ? 'var(--color-accent)' : 'var(--border)'}`,
               cursor: 'pointer', whiteSpace: 'nowrap'
             }}
           >
@@ -241,8 +249,23 @@ function ActionPlanTab({ cityName, anomalies, panelData }) {
 
       {loading && <Spinner />}
 
-      {!loading && error && (
-        <div style={{ padding: '16px', color: '#ef5350', backgroundColor: '#fef0ef', borderRadius: '10px', fontSize: '13px' }}>
+      {isHealthy && (
+        <div style={{ padding: '24px 16px', textAlign: 'center', color: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.05)', borderRadius: '10px', fontSize: '14px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+          <div style={{ fontSize: '24px', marginBottom: '8px' }}>✅</div>
+          <b>City is Healthy</b>
+          <div style={{ marginTop: '4px', fontSize: '13px', color: 'var(--text-secondary)' }}>No critical environmental anomalies detected. No urgent AI action plan is required today.</div>
+        </div>
+      )}
+
+      {missingBackendUpdate && (
+        <div style={{ padding: '16px', color: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)', borderRadius: '10px', fontSize: '13px', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+          <b>⚠️ Action Plan Unavailable</b>
+          <div style={{ marginTop: '4px' }}>The backend API (Render) is running an older version that hasn't synced the ward IDs or the Gemini endpoints. Please deploy your backend code so the AI can fetch the Action Plan!</div>
+        </div>
+      )}
+
+      {!loading && error && !missingBackendUpdate && !isHealthy && (
+        <div style={{ padding: '16px', color: '#ef5350', backgroundColor: 'rgba(239, 83, 80, 0.1)', borderRadius: '10px', fontSize: '13px' }}>
           <b>Error: {error}</b>
         </div>
       )}

@@ -24,30 +24,7 @@ def get_gemini_intervention(ward_id: int, supabase) -> dict:
         logger.error("GEMINI_API_KEY is missing. Cannot fetch intervention.")
         return {"error": "GEMINI_API_KEY not set in environment."}
 
-    # 1. Check Cache (Only regenerate if older than 24 hours)
-    try:
-        cache_resp = (
-            supabase.table("ward_insights")
-            .select("*")
-            .eq("ward_id", ward_id)
-            .limit(1)
-            .execute()
-        )
-        if cache_resp.data:
-            record = cache_resp.data[0]
-            last_updated_str = record.get("updated_at")
-            if last_updated_str:
-                # Handle ISO format timestamp safely
-                last_updated = datetime.fromisoformat(last_updated_str.replace("Z", "+00:00"))
-                now = datetime.now(timezone.utc)
-                diff_seconds = (now - last_updated).total_seconds()
-                
-                # 24 hours = 86400 seconds
-                if diff_seconds < 86400:
-                    logger.info("Returning cached Gemini insight for ward_id=%s (Age: %.1f hrs)", ward_id, diff_seconds/3600)
-                    return record["insights_json"]
-    except Exception as e:
-        logger.warning("Cache check failed for ward_insights. It might not exist yet: %s", e)
+    # (Caching logic removed per user request: generate a new insight every time)
 
     # 2. Fetch Context Data
     # Fetch Ward & City Names
@@ -147,21 +124,7 @@ Force JSON formulation. Return a JSON object mapped exactly to the following key
         logger.error("Failed to generate or parse Gemini response: %s", e)
         return {"error": "Failed to generate valid insight from LLM."}
 
-    # 4. Cache the result in ward_insights
-    now_iso = datetime.now(timezone.utc).isoformat()
-    row = {
-        "ward_id": ward_id,
-        "insights_json": insights_json,
-        "updated_at": now_iso
-    }
+    # Returning fresh content
 
-    try:
-        # Upsert requires ward_id to be uniquely constrained in the DB.
-        supabase.table("ward_insights").upsert(
-            row, on_conflict="ward_id"
-        ).execute()
-        logger.info("Saved new Gemini insights for ward_id=%s", ward_id)
-    except Exception as e:
-        logger.warning("Failed to cache into ward_insights. It may need to be created via migrations: %s", e)
 
     return insights_json

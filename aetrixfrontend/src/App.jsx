@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import MapView from './components/MapView';
 import RightPanel from './components/RightPanel';
 import SentinelChat from './components/SentinelChat';
+import logo from './assets/logo.png';
 import './index.css';
 
 const API = 'https://aetriks-mvp.onrender.com';
@@ -199,12 +200,12 @@ export default function App() {
         {/* ── Header ── */}
         <header className="app-header">
           <div className="logo">
-            <div className="logo-icon" />
-            <span className="logo-text">AETRIX</span>
+            <img src={logo} alt="NagarDrishti Logo" style={{ height: '50px', width: 'auto', objectFit: 'contain' }} />
+            <span className="logo-text">NagarDrishti</span>
           </div>
           <span className="city-info">
             {mapCity.name}
-            {isLoading && <span style={{ marginLeft: 10, fontSize: 12, color: '#7c4dff', opacity: 0.8 }}>⏳ syncing…</span>}
+            {isLoading && <span style={{ marginLeft: 10, fontSize: 12, color: '#a3a3a3', opacity: 0.8 }}>⏳ syncing…</span>}
           </span>
 
           <div className="header-controls">
@@ -217,7 +218,7 @@ export default function App() {
                 value={searchInput}
                 onChange={e => setSearchInput(e.target.value)}
                 onKeyDown={handleSearch}
-                className="bg-slate-800 text-white placeholder-slate-400 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48 transition-all"
+                className="bg-black text-white placeholder-neutral-500 border border-neutral-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-white w-48 transition-all"
               />
             </div>
             <div className="select-box">
