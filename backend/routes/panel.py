@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, current_app
 from collections import defaultdict
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from ml.gemini_intervention import get_gemini_intervention
 
 logger = logging.getLogger(__name__)
 panel_bp = Blueprint("panel", __name__)
@@ -136,6 +137,7 @@ def city_panel(city_name: str):
             pass
 
         anomalies.append({
+            "ward_id": a["ward_id"],
             "severity": "critical" if (a.get("health_risk_score") or 0) > 80 else "warning",
             "title": f"Anomaly in {w_name}",
             "desc": f"Abnormal readings: Temp {a.get('temp')}, AQI {a.get('air_quality')}",
@@ -186,4 +188,20 @@ def city_panel(city_name: str):
             "soil": [],
         },
     })
+
+
+@panel_bp.route("/api/ward-insights/<int:ward_id>", methods=["GET"])
+def ward_insights(ward_id: int):
+    """
+    GET /api/ward-insights/<ward_id>
+    Fetches the Gemini-generated intervention plan for the given ward.
+    """
+    try:
+        insights = get_gemini_intervention(ward_id, current_app.supabase)
+        if "error" in insights:
+            return jsonify(insights), 500
+        return jsonify(insights), 200
+    except Exception as e:
+        logger.error("Failed to fetch ward insights: %s", e)
+        return jsonify({"error": str(e)}), 500
 
