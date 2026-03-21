@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Chart, registerables } from 'chart.js';
 import { metricMeta, months } from '../constants';
+import { downloadCityReport } from '../utils/pdfExport';
 
 Chart.register(...registerables);
 
@@ -167,7 +168,7 @@ function AnalyticsTab({ cityName, panelData }) {
 }
 
 /* ─── Action Plan Tab (Gemini Insights) ─── */
-function ActionPlanTab({ cityName, anomalies }) {
+function ActionPlanTab({ cityName, anomalies, panelData }) {
   const [selectedWard, setSelectedWard] = useState(null);
   const [insight, setInsight] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -209,6 +210,14 @@ function ActionPlanTab({ cityName, anomalies }) {
     <div className="fade-in">
       <div className="action-top">
         <h3>Intervention Insights <span className="count-badge">{anomalies.length} Areas</span></h3>
+        <button 
+          className="btn-export" 
+          onClick={() => downloadCityReport({ cityName, panelData, insight, anomalies })}
+          disabled={!insight}
+          style={{ opacity: !insight ? 0.6 : 1 }}
+        >
+          {'\u2193'} Download Report
+        </button>
       </div>
 
       {/* Selector */}
@@ -352,7 +361,7 @@ export default function RightPanel({ cityName, activeMetrics }) {
               />
             ))}
             {tab === 'analytics' && <AnalyticsTab cityName={cityName} panelData={panelData} />}
-            {tab === 'actions' && <ActionPlanTab cityName={cityName} anomalies={panelData.anomalies || []} />}
+            {tab === 'actions' && <ActionPlanTab cityName={cityName} anomalies={panelData.anomalies || []} panelData={panelData} />}
           </>
         )}
       </div>
