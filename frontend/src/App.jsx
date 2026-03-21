@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import MapCanvas from './components/MapCanvas';
+import SatelliteMap from './components/SatelliteMap';
 import WardInsightCard from './components/WardInsightCard';
 import AnalyticsDrawer from './components/AnalyticsDrawer';
 
@@ -218,8 +219,8 @@ export default function App() {
             <div className="absolute inset-0 flex flex-col">
               {/* Map canvas fills remaining space above drawer */}
               <div className="flex-1 relative min-h-0">
-                <MapCanvas
-                  onWardClick={(ward) => {
+                <SatelliteMap
+                  onWardSelect={(ward) => {
                     setSelectedWard(ward);
                     setDrawerOpen(true);
                   }}
