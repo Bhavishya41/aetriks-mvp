@@ -151,14 +151,14 @@ def chat():
 
     try:
         model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash",
+            model_name="gemini-2.5-flash",
             system_instruction=system_instruction,
-            generation_config={"temperature": 0.4, "max_output_tokens": 300},
+            generation_config={"temperature": 0.4, "max_output_tokens": 1000},
         )
         response = model.generate_content(user_message)
         reply = response.text.strip()
     except Exception as exc:
         logger.error("Gemini chat error: %s", exc)
-        return jsonify({"error": "Gemini request failed. Please try again."}), 500
+        return jsonify({"error": f"Gemini error: {str(exc)}"}), 500
 
     return jsonify({"reply": reply})
