@@ -255,8 +255,8 @@ export default function App() {
           </div>
         </footer>
 
-        {/* Floating Chatbot */}
-        <SentinelChat />
+        {/* Floating Chatbot — receives live city & metric context */}
+        <SentinelChat city={mapCity.name} activeMetrics={activeMetrics} />
       </div>
     </>
   );

@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from routes.audit import audit_bp
 from routes.forecast import forecast_bp
 from routes.panel import panel_bp
+from routes.chat import chat_bp
 
 # ── Configuration ──────────────────────────────────────────────────────────
 load_dotenv()
@@ -33,6 +34,7 @@ app.supabase: Client = create_client(supabase_url, supabase_key)
 app.register_blueprint(audit_bp)
 app.register_blueprint(forecast_bp)
 app.register_blueprint(panel_bp)
+app.register_blueprint(chat_bp)
 
 # ── Core routes ─────────────────────────────────────────────────────────────
 
