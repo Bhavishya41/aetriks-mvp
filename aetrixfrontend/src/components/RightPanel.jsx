@@ -2,10 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { Chart, registerables } from 'chart.js';
 import { metricMeta, months } from '../constants';
 import { downloadCityReport } from '../utils/pdfExport';
+import { fetchWardInsights, fetchCityPanel } from '../api';
 
 Chart.register(...registerables);
-
-const API = 'https://aetriks-mvp.onrender.com';
 
 const colorMap = {
   temp: { line: '#ef5350', bg1: 'rgba(239,83,80,0.25)', bg2: 'rgba(239,83,80,0.01)' },
@@ -193,9 +192,7 @@ function ActionPlanTab({ cityName, anomalies, panelData }) {
     const fetchInsight = async () => {
       setLoading(true); setError(null); setInsight(null);
       try {
-        const res = await fetch(`${API}/api/ward-insights/${selectedWard.ward_id}`);
-        if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
-        const data = await res.json();
+        const data = await fetchWardInsights(selectedWard.ward_id);
         if (!cancelled) setInsight(data);
       } catch (err) {
         if (!cancelled) setError("Could not fetch Gemini insights.");
@@ -319,9 +316,7 @@ export default function RightPanel({ cityName, activeMetrics }) {
       setError(null);
       setPanelData(null);
       try {
-        const res = await fetch(`${API}/api/city-panel/${encodeURIComponent(cityName.toLowerCase())}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
+        const json = await fetchCityPanel(cityName.toLowerCase());
         if (!cancelled) setPanelData(json);
       } catch (err) {
         if (!cancelled) setError(err.message);

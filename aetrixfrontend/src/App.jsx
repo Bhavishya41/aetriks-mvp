@@ -6,8 +6,7 @@ import RightPanel from './components/RightPanel';
 import SentinelChat from './components/SentinelChat';
 import logo from './assets/logo.png';
 import './index.css';
-
-const API = 'https://aetriks-mvp.onrender.com';
+import { fetchGeocode, triggerEnvironmentalAudit, fetchCityPanel, fetchTaskStatus } from './api';
 
 /* ─── Helpers ─── */
 const generateMapElements = (center, currentMetrics) => {
@@ -82,10 +81,7 @@ export default function App() {
       /* 1. Geocode via Nominatim to get a center coordinate */
       let center = [28.6139, 77.209];
       try {
-        const geo = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityKey)}&limit=1`
-        );
-        const geoData = await geo.json();
+        const geoData = await fetchGeocode(cityKey);
         if (geoData?.[0]) {
           center = [parseFloat(geoData[0].lat), parseFloat(geoData[0].lon)];
         }
@@ -96,16 +92,12 @@ export default function App() {
 
       /* 2. Trigger audit pipeline (cache check + optional background job) */
       try {
-        const auditRes = await fetch(`${API}/api/environmental-audit/${encodeURIComponent(cityName)}`);
-        if (!auditRes.ok) throw new Error('Audit trigger failed');
-        const audit = await auditRes.json();
+        const audit = await triggerEnvironmentalAudit(cityName);
 
         const buildMapCity = async (bbox) => {
           /* 3. Fetch aggregated panel data */
           try {
-            const panelRes = await fetch(`${API}/api/city-panel/${encodeURIComponent(cityName.toLowerCase())}`);
-            if (!panelRes.ok) throw new Error('Panel fetch failed');
-            const panel = await panelRes.json();
+            const panel = await fetchCityPanel(cityName.toLowerCase());
 
             if (cancelled) return;
 
@@ -156,8 +148,7 @@ export default function App() {
           const taskId = audit.task_id;
           const poll = setInterval(async () => {
             try {
-              const statusRes = await fetch(`${API}/api/task-status/${taskId}`);
-              const statusData = await statusRes.json();
+              const statusData = await fetchTaskStatus(taskId);
               if (statusData.status === 'completed') {
                 clearInterval(poll);
                 const bbox = statusData.result?.bbox || audit.bbox;

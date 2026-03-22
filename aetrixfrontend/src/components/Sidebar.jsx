@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { metricMeta } from '../constants';
+import { fetchForecast } from '../api';
 
 const metrics = ['temp', 'ndvi', 'aqi'];
 
@@ -12,8 +13,7 @@ export default function Sidebar({ city, activeMetrics, onMetricClick }) {
   const fetchPrediction = async () => {
     try {
       setIsPredicting(true);
-      const res = await fetch(`https://aetriks-mvp.onrender.com/api/forecast/${city.name.toLowerCase()}`);
-      const data = await res.json();
+      const data = await fetchForecast(city.name.toLowerCase());
       if (data.features && data.features.length > 0) {
         let avgTemp = 0, avgAqi = 0, avgNdvi = 0;
         let count = 0;

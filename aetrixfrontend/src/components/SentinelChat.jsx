@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, X, Bot, Loader2 } from 'lucide-react';
-
-const API_BASE = 'http://localhost:8000';
+import { sendChatMessage } from '../api';
 
 const SentinelChat = ({ city = 'unknown', activeMetrics = [] }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -28,16 +27,11 @@ const SentinelChat = ({ city = 'unknown', activeMetrics = [] }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: userText,
-          city: city,
-          metrics: activeMetrics.length > 0 ? activeMetrics : ['LST', 'NDVI', 'NO2'],
-        }),
+      const data = await sendChatMessage({
+        message: userText,
+        city: city,
+        metrics: activeMetrics.length > 0 ? activeMetrics : ['LST', 'NDVI', 'NO2'],
       });
-      const data = await response.json();
       setMessages(prev => [
         ...prev,
         { role: 'ai', content: data.reply || data.error || 'No response from Sentinel.' },
