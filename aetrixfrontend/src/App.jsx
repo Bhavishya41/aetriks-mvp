@@ -67,6 +67,7 @@ export default function App() {
   // What MapView / Sidebar display — built from panel data
   const [mapCity, setMapCity]   = useState(blankCity('Delhi', [28.6139, 77.209]));
   const [isLoading, setIsLoading] = useState(false);
+  const [isCityPending, setIsCityPending] = useState(false);
 
   /* ── Geocode + audit trigger whenever city changes ───────────────────── */
   useEffect(() => {
@@ -76,6 +77,7 @@ export default function App() {
     const cityName = cityKey.charAt(0).toUpperCase() + cityKey.slice(1);
     setMapCity(blankCity(cityName));
     setIsLoading(true);
+    setIsCityPending(false);
 
     const run = async () => {
       /* 1. Geocode via Nominatim to get a center coordinate */
@@ -145,19 +147,25 @@ export default function App() {
         if (audit.status === 'cached') {
           await buildMapCity(audit.bbox);
         } else if (audit.status === 'pending') {
+          // City not yet in DB — show blur overlay while polling
+          if (!cancelled) {
+            setIsLoading(false);
+            setIsCityPending(true);
+          }
           const taskId = audit.task_id;
           const poll = setInterval(async () => {
             try {
               const statusData = await fetchTaskStatus(taskId);
               if (statusData.status === 'completed') {
                 clearInterval(poll);
+                if (!cancelled) setIsCityPending(false);
                 const bbox = statusData.result?.bbox || audit.bbox;
                 await buildMapCity(bbox);
               } else if (statusData.status === 'failed') {
                 clearInterval(poll);
-                if (!cancelled) setIsLoading(false);
+                if (!cancelled) { setIsLoading(false); setIsCityPending(true); }
               }
-            } catch (_) { clearInterval(poll); if (!cancelled) setIsLoading(false); }
+            } catch (_) { clearInterval(poll); if (!cancelled) { setIsLoading(false); setIsCityPending(true); } }
           }, 3000);
         } else {
           setIsLoading(false);
@@ -227,7 +235,19 @@ export default function App() {
         <Sidebar city={mapCity} activeMetrics={activeMetrics} onMetricClick={handleMetricClick} />
 
         {/* ── Map ── */}
-        <MapView city={mapCity} activeMetrics={activeMetrics} />
+        <div className={`app-map-wrapper${isCityPending ? ' city-pending' : ''}`}>
+          <MapView city={mapCity} activeMetrics={activeMetrics} />
+          {isCityPending && (
+            <div className="map-pending-overlay">
+              <div className="map-pending-card">
+                <div className="map-pending-spinner" />
+                <p className="map-pending-title">Processing City Data…</p>
+                <p className="map-pending-sub">This city is being added to our database. It may take a few minutes.</p>
+                <p className="map-pending-hint">🗺️ You can try exploring other cities</p>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* ── Right Panel — self-fetching, only needs city name ── */}
         <RightPanel cityName={mapCity.name} activeMetrics={activeMetrics} />
