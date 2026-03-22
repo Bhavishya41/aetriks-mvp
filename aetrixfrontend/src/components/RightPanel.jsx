@@ -204,17 +204,13 @@ function ActionPlanTab({ cityName, anomalies, panelData }) {
     return () => { cancelled = true; };
   }, [selectedWard]);
 
-  if (anomalies.length === 0) {
-    return <div style={{ padding: '24px', color: '#9aa0b4', fontSize: 13 }}>No anomalies found to analyze.</div>;
-  }
-
-  const isHealthy = selectedWard?.title === "No critical anomalies";
+  const isHealthy = anomalies.length === 0;
   const missingBackendUpdate = !isHealthy && !selectedWard?.ward_id;
 
   return (
     <div className="fade-in">
       <div className="action-top">
-        <h3>Intervention Insights <span className="count-badge">{anomalies.length} Areas</span></h3>
+        <h3>Intervention Insights {isHealthy ? '' : <span className="count-badge">{anomalies.length} Areas</span>}</h3>
         <button 
           className="btn-export" 
           onClick={() => downloadCityReport({ cityName, panelData, insight, anomalies })}

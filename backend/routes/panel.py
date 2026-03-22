@@ -57,7 +57,12 @@ def city_panel(city_name: str):
         if row.get("vegetation") is not None:
             monthly_stats[(y, m)]["ndvi"].append(row["vegetation"])
             
-        if row.get("is_anomaly") or (row.get("health_risk_score") and row.get("health_risk_score") > 70):
+        # Flag as anomaly if: DB flagged it, high health risk, high temp (>38°C), or high AQI (>60)
+        is_flagged  = bool(row.get("is_anomaly"))
+        high_risk   = (row.get("health_risk_score") or 0) > 70
+        high_temp   = (row.get("temp") or 0) > 38
+        high_aqi    = (row.get("air_quality") or 0) > 60
+        if is_flagged or high_risk or high_temp or high_aqi:
             anomalies_raw.append(row)
 
     # Sort months chronologically
@@ -110,12 +115,13 @@ def city_panel(city_name: str):
         if t_aqi: trends.append(t_aqi)
         if t_ndvi: trends.append(t_ndvi)
     
-    # Default mock trends if none
-    if not trends:
-        trends = [
-            {"metric": "Temperature", "change": "+0.5", "direction": "up", "pct": "+1.2%"},
-            {"metric": "AQI", "change": "-5", "direction": "down", "pct": "-4.5%"}
-        ]
+    # If only 1 month of data, show current values as informational trends
+    if not trends and sorted_months:
+        only = sorted_months[-1]
+        only_idx = only[1] - 1
+        if lst_array[only_idx]  is not None: trends.append({"metric": "Temperature",     "change": f"{lst_array[only_idx]:+.2f}",  "direction": "up",   "pct": "current"})
+        if aqi_array[only_idx]  is not None: trends.append({"metric": "AQI (NO2 Proxy)", "change": f"{aqi_array[only_idx]:+.2f}",  "direction": "up",   "pct": "current"})
+        if ndvi_array[only_idx] is not None: trends.append({"metric": "Vegetation (NDVI)","change": f"{ndvi_array[only_idx]:+.4f}", "direction": "down", "pct": "current"})
 
     # Process anomalies for display
     anomalies = []
@@ -148,17 +154,7 @@ def city_panel(city_name: str):
             "type": "aqi" if a.get("air_quality", 0) > 100 else "temp"
         })
 
-    if not anomalies:
-        anomalies = [
-            {
-                "severity": "warning",
-                "title": "No critical anomalies",
-                "desc": "All metrics are within expected ranges for the fetched period.",
-                "source": "System",
-                "date": datetime.utcnow().strftime("%Y-%m-%d"),
-                "lat": 0, "lng": 0, "type": "info"
-            }
-        ]
+    # Return empty list if no anomalies — the frontend shows "City is Healthy" state
 
     # Helper: last known non-null value in an array
     def last_known(arr, default):
@@ -190,11 +186,12 @@ def city_panel(city_name: str):
     })
 
 
-@panel_bp.route("/api/ward-insights/<int:ward_id>", methods=["GET"])
-def ward_insights(ward_id: int):
+@panel_bp.route("/api/ward-insights/<string:ward_id>", methods=["GET"])
+def ward_insights(ward_id: str):
     """
     GET /api/ward-insights/<ward_id>
     Fetches the Gemini-generated intervention plan for the given ward.
+    ward_id is a UUID string (as stored in Supabase), not an integer.
     """
     try:
         insights = get_gemini_intervention(ward_id, current_app.supabase)

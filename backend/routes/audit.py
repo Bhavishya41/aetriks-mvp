@@ -84,8 +84,11 @@ def environmental_audit(city_name: str):
 
     city_key = city_name.lower().strip()
 
-    # ── Check cache: does this city already have env data for current month? ─
-    now = datetime.utcnow()
+    # ── Check cache: does this city already have wards stored in the DB? ──────
+    # We consider a city "cached" if its wards exist — regardless of which
+    # month the environment data was collected. This prevents the pipeline
+    # from re-running (and the frontend from polling) every time the page
+    # loads just because the stored data is from a past month.
     try:
         city_resp = (
             supabase.table("cities")
@@ -97,7 +100,7 @@ def environmental_audit(city_name: str):
 
         if city_resp.data:
             city_id = city_resp.data[0]["id"]
-            # Look for any ward_environment row for this month/year
+            # City exists — check if it has at least one ward
             sample_ward = (
                 supabase.table("wards")
                 .select("id")
@@ -105,21 +108,8 @@ def environmental_audit(city_name: str):
                 .limit(1)
                 .execute()
             )
-            cached = False
             if sample_ward.data:
-                ward_id = sample_ward.data[0]["id"]
-                env_resp = (
-                    supabase.table("ward_environment")
-                    .select("id")
-                    .eq("ward_id", ward_id)
-                    .eq("month", now.month)
-                    .eq("year", now.year)
-                    .limit(1)
-                    .execute()
-                )
-                cached = bool(env_resp.data)
-
-            if cached:
+                # Wards are present → treat as fully cached, skip pipeline
                 return jsonify({
                     "status":  "cached",
                     "city":    city_name,
