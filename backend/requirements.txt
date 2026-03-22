@@ -10,3 +10,4 @@ osmnx
 scikit-learn
 gunicorn
 google-generativeai
+google-genai
