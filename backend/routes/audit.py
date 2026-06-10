@@ -84,40 +84,44 @@ def environmental_audit(city_name: str):
 
     city_key = city_name.lower().strip()
 
+    force_refresh = request.args.get("force", "false").lower() == "true"
+
     # ── Check cache: does this city already have wards stored in the DB? ──────
     # We consider a city "cached" if its wards exist — regardless of which
     # month the environment data was collected. This prevents the pipeline
     # from re-running (and the frontend from polling) every time the page
     # loads just because the stored data is from a past month.
+    # Note: If force=true is passed, we skip this check to refresh database.
     try:
-        city_resp = (
-            supabase.table("cities")
-            .select("id")
-            .eq("name", city_key)
-            .limit(1)
-            .execute()
-        )
-
-        if city_resp.data:
-            city_id = city_resp.data[0]["id"]
-            # City exists — check if it has at least one ward
-            sample_ward = (
-                supabase.table("wards")
+        if not force_refresh:
+            city_resp = (
+                supabase.table("cities")
                 .select("id")
-                .eq("city_id", city_id)
+                .eq("name", city_key)
                 .limit(1)
                 .execute()
             )
-            if sample_ward.data:
-                # Wards are present → treat as fully cached, skip pipeline
-                return jsonify({
-                    "status":  "cached",
-                    "city":    city_name,
-                    "bbox":    bbox,
-                    "message": "Data already exists. Use /api/city-health/<city_name> to fetch it.",
-                }), 200
-        else:
-            city_id = None
+
+            if city_resp.data:
+                city_id = city_resp.data[0]["id"]
+                # City exists — check if it has at least one ward
+                sample_ward = (
+                    supabase.table("wards")
+                    .select("id")
+                    .eq("city_id", city_id)
+                    .limit(1)
+                    .execute()
+                )
+                if sample_ward.data:
+                    # Wards are present → treat as fully cached, skip pipeline
+                    return jsonify({
+                        "status":  "cached",
+                        "city":    city_name,
+                        "bbox":    bbox,
+                        "message": "Data already exists. Use /api/city-health/<city_name> to fetch it.",
+                    }), 200
+            else:
+                city_id = None
 
     except Exception as exc:
         logger.error("Cache check failed: %s", exc)
